@@ -1,10 +1,12 @@
 import { React, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import './Signup.scss';
-import { firestore } from '../../firebase';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheck } from "@fortawesome/free-solid-svg-icons";
+import { db } from '../../firebase';
+import { setDoc, getDoc, doc } from "firebase/firestore";
 
 const Signup = () => {
-    const user_info = firestore.collection('user_info');
     const years = Array.from({length: 2003-1900}, (v, i) => 2003-i);
     const months = Array.from({length: 12}, (v, i) => i+1);
     const days = [
@@ -12,69 +14,80 @@ const Signup = () => {
         Array.from({length:30}, (v,i) => i+1),
         Array.from({length:28}, (v,i) => i+1)        
     ];
-    const [errmsg, setErrmsg] = useState(false);
+    
     const [inputs, setInputs] = useState({
         id: '',
         password: '',
         re_password: '',
         name: '',
+        phoneNumber: '',
         year: '',
         month: '',
         day: '',
         sex: ''
     });
-    const [isOk, setIsOk] = useState({
+    const [isPropsOk, setisPropsOk] = useState({
         id: true,
         password: true,
         re_password: true,
+        phoneNumber: true,
         id_check: false,
     });
 
-    const { id, password, re_password, name, year, month, day } = inputs;
+    const { id, password, re_password, name, phoneNumber, year, month, day } = inputs;
 
     const navigate= useNavigate();
 
     const CreateUser = (e) => {
         e.preventDefault();
-        const info = {
+        const user_data = {
             id: '', 
             password: '', 
             name: '', 
+            phoneNumber: '',
             year: '', 
             month: '', 
             day: '', 
             sex: ''
         };
 
-        if ( isOk.id_check && isOk.id ) {
-            for (let key of Object.keys(info)) {
-                info[key] = e.target[key].value;
+        if ( isPropsOk.id_check && isPropsOk.id && isPropsOk.password && isPropsOk.phoneNumber && inputs.name !== '' && inputs.year !== '' && inputs.month !== '' && inputs.day !== '' && inputs.sex !== '') {
+            for (let key of Object.keys(user_data)) {
+                user_data[key] = e.target[key].value;
             }
-    
-            user_info.doc(info.id).set( { ...info, type: 'null' });
-            window.alert("회원가입이 완료되었습니다!!\n로그인 페이지로 이동합니다.");
-            navigate('/login');
+                        
+            try {
+                setDoc(doc(db, "user_info", user_data.id), {
+                    ...user_data,
+                    type: 'null',
+                    role: 'normal'
+                }).then(doc => doc.exists())
+
+                window.alert("회원가입이 완료되었습니다!!\n로그인 페이지로 이동합니다.");
+                navigate('/login');
+            } catch(e) {
+                window.alert("Error가 발생하였습니다. \n다시 시도해주세요.");
+            }
         } else {
-            setErrmsg(true);
+            window.alert("빈 입력이 있습니다! \n다시 시도해주세요.");
         }
     };
 
     const isAvailable_id = () => {
-        user_info.doc(inputs.id).get().then(doc => {
-            if (doc.exists) {
-                setIsOk({
-                    ...isOk,
+        getDoc(doc(db, "user_info", inputs.id)).then(doc => {
+            if (doc.exists()) {
+                setisPropsOk({
+                    ...isPropsOk,
                     id: false,
                     id_check: false
                 });
             } else {
-                setIsOk({
-                    ...isOk,
+                setisPropsOk({
+                    ...isPropsOk,
                     id: true,
                     id_check: true
                 });
             };
-            setErrmsg(false);
         });
     };
 
@@ -92,8 +105,8 @@ const Signup = () => {
             ...inputs,
             [name] : value
         });
-        setIsOk({
-            ...isOk,
+        setisPropsOk({
+            ...isPropsOk,
             id_check: false
         })
     }
@@ -108,54 +121,57 @@ const Signup = () => {
                 <form  onSubmit={CreateUser}>
                     <div className="signup-row">
                         <div className="signup-type">아이디</div>
-                        <div className={ 
-                            errmsg ? 'signup-input-err' : 
-                            (isOk.id ? "signup-input-area" : 'signup-input-err')
+                        <div className={
+                            inputs.id === '' ? 'signup-input-area' : 
+                            (isPropsOk.id ? ('signup-id-check-ok') : 'signup-input-err')
                         }>
                             <input 
                                 name="id" 
                                 value={id} 
                                 onChange={onIdChange} 
                                 onFocus={(e) => e.target.placeholder=''}
-                                onBlur={(e) => e.target.placeholder='ID'}
+                                onBlur={(e) => {
+                                    if (e.target.value === '') {
+                                        e.target.placeholder='ID';
+                                    } else {
+                                        isAvailable_id()
+                                    }
+                                }}
                                 placeholder='ID'
-                                className="signup-input" 
+                                className="signup-input"
                                 type="text" 
                                 maxLength="20"
                             />
-                            <span 
-                                className={isOk.id_check ? "signup-id-check-ok pointer" : "signup-id-check pointer"}
-                                onClick={isAvailable_id}
-                            >
-                                {isOk.id_check ? '확인완료!' : '중복확인'}
-                            </span>
+                            <span className={isPropsOk.id_check ? 'signup-check-ok' : 'hide'}><FontAwesomeIcon icon={faCheck} /></span>
                         </div>
-                        <p className={ isOk.id ? 'hide err-msg' : 'err-msg'}>
-                            다른 아이디를 이용하세요!
-                        </p>
-                        <p className={ errmsg ? 'err-msg' : 'hide err-msg'}>
-                            중복확인을 해주세요!
+                        <p className={ inputs.id === '' ? 'hide' : 
+                            (isPropsOk.id ? ('hide') : 'signup-err-msg')
+                        }>
+                            이미 사용 중인 아이디입니다!
                         </p>
                     </div>
                     <div className="signup-row">
                         <div className="signup-type">비밀번호</div>
                         <div className={
-                            isOk.password ? "signup-input-area" : 'signup-input-err'
+                            inputs.password === '' ? 'signup-input-area' : 
+                            (isPropsOk.password ? ('signup-input-area') : 'signup-input-err')
                         }>
                             <input 
                                 name="password" 
                                 value={password} 
-                                onChange={onChange} 
+                                onChange={onChange}
                                 onFocus={(e) => e.target.placeholder=''}
                                 onBlur={(e) => {
-                                    if (e.target.value.length < 8 || e.target.value.length > 32) {
-                                        setIsOk({
-                                            ...isOk,
+                                    if (e.target.value === '') {
+                                        e.target.placeholder='비밀번호 (8~32자리)'
+                                    } else if  (e.target.value.length < 8 || e.target.value.length > 32) {
+                                        setisPropsOk({
+                                            ...isPropsOk,
                                             [e.target.name]: false
                                         });
                                     } else {
-                                        setIsOk({
-                                            ...isOk,
+                                        setisPropsOk({
+                                            ...isPropsOk,
                                             [e.target.name]: true
                                         });
                                     };
@@ -164,14 +180,17 @@ const Signup = () => {
                                 className="signup-input" 
                                 type="password" />
                         </div>
-                        <p className={ isOk.password ? 'hide err-msg' : 'err-msg'}>
+                        <p className={ inputs.password === '' ? 'hide' : 
+                            (isPropsOk.password ? 'hide' : 'signup-err-msg')
+                        }>
                             8~32자리의 비밀번호를 입력해주세요!                                
                         </p>
                     </div>
                     <div className="signup-row">
                         <div className="signup-type">비밀번호 재확인</div>
                         <div className={
-                            isOk.re_password ? "signup-input-area" : 'signup-input-err'
+                            inputs.re_password === '' ? 'signup-input-area' : 
+                            (isPropsOk.re_password ? 'signup-input-area' : 'signup-input-err')
                         }>
                             <input 
                                 name="re_password" 
@@ -179,15 +198,16 @@ const Signup = () => {
                                 onChange={onChange} 
                                 onFocus={(e) => e.target.placeholder=''}
                                 onBlur={(e) => {
-                                    e.target.placeholder="비밀번호 재확인";
-                                    if ( inputs.password !== e.target.value ) {
-                                        setIsOk({
-                                            ...isOk,
+                                    if (e.target.value === '') {
+                                        e.target.placeholder="비밀번호 재확인";
+                                    } else if ( inputs.password !== e.target.value ) {
+                                        setisPropsOk({
+                                            ...isPropsOk,
                                             [e.target.name]: false
                                         });
                                     } else {
-                                        setIsOk({
-                                            ...isOk,
+                                        setisPropsOk({
+                                            ...isPropsOk,
                                             [e.target.name]: true
                                         });
                                     };
@@ -196,7 +216,11 @@ const Signup = () => {
                                 className="signup-input" 
                                 type="password" />
                         </div>
-                        <p className={ isOk.re_password ? 'hide err-msg' : 'err-msg'}>비밀번호가 일치하지 않습니다!</p>
+                        <p className={ inputs.re_password === '' ? 'hide' : 
+                            (isPropsOk.re_password ? 'hide' : 'signup-err-msg')
+                        }>
+                            비밀번호가 일치하지 않습니다!
+                        </p>
                     </div>
                     <div className="signup-row">
                         <div className="signup-type">이름</div>
@@ -212,6 +236,43 @@ const Signup = () => {
                                 type="text"
                             />
                         </div>
+                    </div>
+                    <div className="signup-row">
+                        <div className="signup-type">연락처</div>
+                        <div className={
+                            inputs.phoneNumber === '' ? 'signup-input-area' : 
+                            (isPropsOk.phoneNumber ? 'signup-input-area' : 'signup-input-err')
+                        }>
+                            <input 
+                                name="phoneNumber" 
+                                value={phoneNumber} 
+                                onChange={onChange} 
+                                onFocus={(e) => e.target.placeholder=''}
+                                onBlur={(e) => {
+                                    if (e.target.value === '') {
+                                        e.target.placeholder="연락처 (\"-\" 빼고 입력)";
+                                    } else if ( e.target.value.length !== 11 ) {
+                                        setisPropsOk({
+                                            ...isPropsOk,
+                                            [e.target.name]: false
+                                        });
+                                    } else {
+                                        setisPropsOk({
+                                            ...isPropsOk,
+                                            [e.target.name]: true
+                                        });
+                                    };
+                                }}
+                                placeholder= "연락처 (&quot;-&quot; 빼고 입력)"
+                                className="signup-input" 
+                                type="number"
+                            />
+                        </div>
+                        <p className={ inputs.phoneNumber === '' ? 'hide' : 
+                            (isPropsOk.phoneNumber ? 'hide' : 'signup-err-msg')
+                        }>
+                            올바른 번호가 아닙니다!
+                        </p>
                     </div>
                     <div className="signup-row">
                         <div className="signup-type">생일</div>
@@ -261,8 +322,7 @@ const Signup = () => {
                     </div>
                     <div className="signup-btn-area">
                         <button 
-                            className={ (isOk.id && isOk.password && isOk.re_password ) ? "signup-btn pointer" : 'signup-btn' }
-                            disabled= { (isOk.id && isOk.password && isOk.re_password ) ? false : true }
+                            className={ "signup-btn pointer" }
                             type="submit">회원가입</button>
                     </div>
                 </form>

@@ -14,23 +14,15 @@ const Header = () => {
         { title : '찾아보기', location: '/findshop' },
     ];
 
-    const [isScroll, setIsScroll] = useState(false);
-    const [logOn, setLogon] = useState(false);
+    const [login, setLogin] = useState(false);
 
     useEffect(() => {
-        window.addEventListener('scroll', () => {
-            window.pageYOffset > 20 ?
-            setIsScroll(true) : setIsScroll(false)
-        });
-    }, [isScroll]);
-
-    useEffect(() => {
-        window.localStorage.length !== 0 ? 
-        setLogon(true) : setLogon(false);
+        window.sessionStorage.length !== 0 ? 
+        setLogin(true) : setLogin(false);
     }, [location]);
 
     const logOut = () => {
-        localStorage.clear();
+        sessionStorage.clear();
         if (location.pathname !== '/') {
             navigate('/');
         } else {
@@ -39,21 +31,23 @@ const Header = () => {
     };
     
     return (
-        <div className={
-            location.pathname === '/' ? 
-            (isScroll ? 'header-area' : 'header-area style-ch') :
-            'header-area'
-        }>
+        <div className='header-area'>
             <div className="header-content-area">
+                <div className="header-logo-area">
+                    <img className="header-logo pointer"
+                        src="img/Tipsy_Logo.png"
+                        alt="Logo"
+                        onClick={() => navigate('/')}
+                        />
+                </div>
                 <ul className="header-menu-area">
                     {navMenu.map(({title, location}) => (
                         <li className='pointer' key={title} onClick={() => navigate(`${location}`)}>{title}</li>
                     ))}
                 </ul>
-                <div className="header-title pointer" onClick={() => navigate('/')}>취향저격이酒</div>
                 <div className="header-my-menu-area">
-                    <div className="pointer" onClick={() => logOn ? navigate('/mypage') : navigate('/login')}><FontAwesomeIcon icon={faUser} /></div>
-                    <div className={logOn ? "pointer" : "pointer hide"}  onClick={logOut}><FontAwesomeIcon icon={faArrowRightFromBracket}/></div>
+                    <div className="pointer" onClick={() => login ? navigate('/mypage') : navigate('/login')}><FontAwesomeIcon icon={faUser} /></div>
+                    <div className={login ? "pointer" : "pointer hide"}  onClick={logOut}><FontAwesomeIcon icon={faArrowRightFromBracket}/></div>
                     <div className="pointer" onClick={() => navigate('/')}><FontAwesomeIcon icon={faCartShopping} /></div>
                 </div>
             </div>

@@ -8,14 +8,14 @@ const Teststart = () => {
     return (
         <div className="teststart-area">
             <div className="teststart-container">
-                <div className="teststart-ment">
-                    테스트로<br/>
-                    알아보는<br/>
-                    술 취향!
+                <h2 className="teststart-main-title">테스트로 알아보는<br/>술 취향</h2>
+                <p className="teststart-sub-title">절대적인 기준은 아니지만 추천에는<br/>도움이 될 거에요</p>
+                <dir className="teststart-img-area">
+                    <img className="teststart-img" src="./img/Tipsy_teststart_img.png" alt="glasses_img" />
+                </dir>
+                <div className="teststart-btn-area">
+                    <button className="teststart-btn pointer" onClick={() => navigate('/test')}>시작</button>
                 </div>
-                <div className="teststart-tested">지금까지 <span>19,958</span>명이 자기 취향을 알아봤어요!!</div>
-                <button className="teststart-start-btn pointer" onClick={() => navigate('/test')}>시 작!</button>
-                <div className="teststart-notice">&#8251; 절대적인 기준은 아니지만 추천에는 도움을 줍니다!! &#8251;</div>
             </div>
         </div>
     )

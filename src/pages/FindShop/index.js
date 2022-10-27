@@ -15,7 +15,7 @@ const FindShop = () => {
     const alchohols = ["와인", "위스키", "칵테일"];
     const cities = ["서울특별시", "부산", "인천광역시", "수원", "대전", "대구", "광주"];
     const [modal, setModal] = useState(false);
-    const [keyword, setKeyword] = useState("");
+    const [keyword, setKeyword] = useState("와인");
 
     const tmp = {
         img: "이미지",
@@ -41,13 +41,13 @@ const FindShop = () => {
             }}/>}
             <div className="findshop-map-area">
                 <div className="findshop-map">
-                    <KakaoMap/>
+                    <KakaoMap keyword={keyword}/>
                 </div>
                 <div className="findshop-filter-row">
                     <p className="findshop-filter-title"><FontAwesomeIcon icon={faAngleDown}/> 주종</p>
                     <div className="findshop-filter-tags">
                         {alchohols.map(a => 
-                            <ul key={a.toString()} className="findshop-filter-tag pointer">{a}</ul>
+                            <ul key={a.toString()} className="findshop-filter-tag pointer" onClick={()=>setKeyword(a + "바")}>{a}</ul>
                         )}
                     </div>
                 </div>

@@ -6,20 +6,20 @@ const Shop = (props) => {
     return (
         <div className='shop-container pointer' onClick={() => props.setCurrentShop(true)}>
             <div className='shop-img-area'>
-                {props.tmp.img}
+                {props.shopData.img}
             </div>
             <div className='shop-detail-area'>
                 <div className='shop-title-area'>
-                    <p className='shop-name'>{props.tmp.name}</p>
-                    <p className='shop-city'>{props.tmp.city}</p>
+                    <p className='shop-name'>{props.shopData.name}</p>
+                    <p className='shop-city'>{props.shopData.city}</p>
                 </div>
-                <p className='shop-description'>{props.tmp.description}</p>
+                <p className='shop-description'>{props.shopData.description}</p>
                 <div className='shop-review-area'>
-                    <p className='shop-review'>☆☆☆☆☆ {props.tmp.reviews}</p>
+                    <p className='shop-review'>☆☆☆☆☆ {props.shopData.reviews}</p>
                     <span className='shop-review-count'>00개</span>
                 </div>
                 <div className='shop-tag-area'>
-                    {props.tmp.tags.map(tag => (
+                    {props.shopData.tags.map(tag => (
                         <span key={tag.toString()} className="shop-tag">{tag}</span>
                     ))}
                 </div>

@@ -1,19 +1,18 @@
 import React, { useEffect, useState  } from 'react'
 
-const KakaoMap = ({keyword}) => {
+const KakaoMap = ({keyword, setShopData}) => {
     const { kakao } = window;
     const [myLocation, setMyLocation] = useState({
         latitude: null, 
         longitude: null,
     });
-    const [dong, setDong] = useState("");
 
     useEffect(() => {
         // 지도 생성
         const mapCotainer = document.getElementById("map"),
             mapOption = {
                 center: new kakao.maps.LatLng(33.450701, 126.570667),
-                level: 10,
+                level: 7,
         };
         const map = new kakao.maps.Map(mapCotainer, mapOption);
 
@@ -28,7 +27,7 @@ const KakaoMap = ({keyword}) => {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position){
                 setMyLocation({
-                    latitude: position.coords.latitude,
+                    latitude: position.coords.latitude, 
                     longitude: position.coords.longitude,
                 });
 
@@ -59,22 +58,36 @@ const KakaoMap = ({keyword}) => {
             map.setCenter(position);
         }
 
-
         // 키워드로 장소 검색
         ps.keywordSearch(keyword, placesSearchCB, {
-            useMapBounds: true,
+            radius : 5000, // 반경
+            location: new kakao.maps.LatLng(myLocation.latitude, myLocation.longitude),
+            // size: 4, // 한페이지에 몇개를 보여줄지
         });
+        console.log(keyword);
         
         function placesSearchCB(data, status, pagination){
             if(status === kakao.maps.services.Status.OK){
                 // 검색된 장소 위치를 기준으로 지도 범위를 재설정
                 const bounds = new kakao.maps.LatLngBounds();
-                console.log(data)
-
                 for(let i=0; i < data.length; i++){
                     displayMarker(data[i]);
                     bounds.extend(new kakao.maps.LatLng(data[i].y, data[i].x));
                 }
+                
+                setShopData({
+                    data: data,
+                    dataCount: pagination.totalCount,
+                })
+                // changeData(data, pagination.totalCount);
+                console.log(data)
+                console.log(pagination.totalCount)
+
+                // console.log(shopData.data)
+                // console.log(shopData.dataCount)
+            
+            }else{
+                alert("주변에 상점이 없습니다.")
             }
         }
 
@@ -90,18 +103,18 @@ const KakaoMap = ({keyword}) => {
             })
         }
 
-        // 좌표 값에 해당하는 행정동, 법정도 정보 얻기
-        const geocoder = new kakao.maps.services.Geocoder();
-        const callback = function(result, status){
-            if(status === kakao.maps.services.Status.OK){
-                console.log('지역 명칭 : ' + result[0].address_name);
-            }
-            setDong(result[0]);
-        };
+        // 좌표 값에 해당하는 행정동, 법정동 정보 얻기
+        // const geocoder = new kakao.maps.services.Geocoder();
+        // const callback = function(result, status){
+        //     if(status === kakao.maps.services.Status.OK){
+        //         console.log('지역 명칭 : ' + result[0].address_name);
+        //     }
+        //     setDong(result[0]);
+        // };
 
-        geocoder.coord2RegionCode(myLocation.longitude, myLocation.latitude, callback);
+        // geocoder.coord2RegionCode(myLocation.longitude, myLocation.latitude, callback);
 
-}, [myLocation.latitude, myLocation.longitude, keyword]);
+}, [myLocation.latitude, myLocation.longitude, keyword, setShopData]);
 
     return(
         <div id="map"></div>

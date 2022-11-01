@@ -1,26 +1,36 @@
-import React, {useEffect, useState} from "react";
+import React, { useState, useEffect} from "react";
 // import { Shop } from "../../components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAngleDown, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faAngleDown } from "@fortawesome/free-solid-svg-icons";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import "./FindShop.scss";
-// import { db } from '../../firebase';
-// import { getDoc, updateDoc, doc, setDoc, serverTimestamp, arrayUnion } from "firebase/firestore";
 import KakaoMap from "../../components/KakaoMap";
 import Modal from "../../components/Modal";
-import Pagination from "../../components/Pagination";
 
-const ShopPagination = ({shopData}) => {
-    const [currentItems, setCurrentItems] = useState([]);
-
-    console.log(shopData.data)
-    console.log(shopData.dataCount)
+const ShopPagination = ({shopData, shopHasPage, setShopHasPage, currentPage, setCurrentPage, shopPrevNextPage, setShopPrevNextPage}) => {
+    const [shopPageCount, setShopPageCount] = useState(0); // 검색결과에 따라 page 생성
+    const [shopDataArr, setShopDataArr] = useState([]); // 페이지 번호를 위한 배열
+    const dataArr = Array.from({length: shopData.dataCount}, (_, i) => i + 1); // 검색결과 수에 따른 배열 만들기
+    
+    useEffect(()=>{
+        setShopPageCount(Math.ceil((dataArr.length / 4)));
+        setShopDataArr(Array.from({length: shopPageCount}, (_, i) => i + 1))
+    },[setShopPageCount, dataArr.length, shopPageCount, setShopDataArr])
+    
+    // console.log(shopDataArr)
+    // console.log(shopData.data)
+    
     return(
-            <Pagination items={shopData.data}
-            currentItems={currentItems}
-            setCurrentItems={setCurrentItems}
-            itemsPerPage={4}/>
-    )
+            <ul className="findshop-pagination">
+                <li onClick={() => {setShopPrevNextPage({next: false, prev : true, pageLength: shopDataArr.length})}}>{"<"}</li>
+                {shopDataArr.map((shops, index) => (
+                    <li key={index} onClick={()=> 
+                        {setCurrentPage(index + 1)
+                        setShopHasPage(true)}}>{shops}</li>
+                ))}
+                <li onClick={() => {setShopPrevNextPage({next: true, prev: false, pageLength: shopDataArr.length})}}>{">"}</li> 
+            </ul>
+            )
 }
 
 const FindShop = () => {
@@ -28,12 +38,18 @@ const FindShop = () => {
     const alchohols = ["와인", "위스키", "칵테일"];
     const cities = ["서울", "부산", "인천", "수원", "대전", "대구", "광주"];
     const [modal, setModal] = useState(false);
-    const [keyword, setKeyword] = useState("와인바");
+    const [keyword, setKeyword] = useState("와인");
+    const [currentPage, setCurrentPage] = useState(1); // 현재 페이지
     const [shopData, setShopData] = useState({
         data: [],
         dataCount: 0
     });
-    
+    const [shopHasPage, setShopHasPage] = useState(false);
+    const [shopPrevNextPage, setShopPrevNextPage] = useState({
+        next: false,
+        prev: false,
+        pageLength: 0,
+    });
 
     const tmp = {
         img: "이미지",
@@ -59,7 +75,14 @@ const FindShop = () => {
             <div className="findshop-map-area">
                 <div className="findshop-map">
                     <KakaoMap keyword={keyword} 
+                    shopHasPage={shopHasPage}
+                    setShopHasPage={setShopHasPage}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    shopData={shopData}
                     setShopData={setShopData}
+                    shopPrevNextPage={shopPrevNextPage}
+                    setShopPrevNextPage={setShopPrevNextPage}
                     />
                 </div>
                 <div className="findshop-filter-row">
@@ -124,7 +147,13 @@ const FindShop = () => {
                         </div>
                     </div>))}
                 </div>
-                <ShopPagination shopData={shopData}/>
+            <ShopPagination shopData={shopData}
+                    shopHasPage={shopHasPage}
+                    setShopHasPage={setShopHasPage}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    shopPrevNextPage={shopPrevNextPage}
+                    setShopPrevNextPage={setShopPrevNextPage}/>
             </div>
         </div>
     )

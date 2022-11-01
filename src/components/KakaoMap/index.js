@@ -1,20 +1,22 @@
 import React, { useEffect, useState  } from 'react'
 
-const KakaoMap = ({keyword, setShopData}) => {
-    const { kakao } = window;
+const { kakao } = window;
+
+const KakaoMap = ({keyword, shopData, setShopData, shopHasPage, setShopHasPage, currentPage, setCurrentPage, shopPrevNextPage, setShopPrevNextPage}) => {
     const [myLocation, setMyLocation] = useState({
         latitude: null, 
         longitude: null,
     });
-
+    
     useEffect(() => {
         // 지도 생성
         const mapCotainer = document.getElementById("map"),
             mapOption = {
-                center: new kakao.maps.LatLng(33.450701, 126.570667),
-                level: 7,
+                center: new kakao.maps.LatLng(37.5726, 126.98),
+                level: 6,
         };
         const map = new kakao.maps.Map(mapCotainer, mapOption);
+
 
         // 마커 클릭시 장소명을 표출할 인포윈도우
         const infowindow = new kakao.maps.InfoWindow({zIndex: 1});
@@ -30,10 +32,11 @@ const KakaoMap = ({keyword, setShopData}) => {
                     latitude: position.coords.latitude, 
                     longitude: position.coords.longitude,
                 });
-
-                const locPosition = new kakao.maps.LatLng(myLocation.latitude, myLocation.longitude)
+                const locPosition = new kakao.maps.LatLng(myLocation.latitude, myLocation.longitude);
                 displayMyMarker(locPosition);
             });
+
+
 
         }else{
             // 위치 추적에 실패 했을때 초기값
@@ -56,15 +59,14 @@ const KakaoMap = ({keyword, setShopData}) => {
             })
 
             map.setCenter(position);
-        }
+        }        
 
         // 키워드로 장소 검색
         ps.keywordSearch(keyword, placesSearchCB, {
             radius : 5000, // 반경
             location: new kakao.maps.LatLng(myLocation.latitude, myLocation.longitude),
-            // size: 4, // 한페이지에 몇개를 보여줄지
+            size: 4, // 한페이지에 몇개를 보여줄지
         });
-        console.log(keyword);
         
         function placesSearchCB(data, status, pagination){
             if(status === kakao.maps.services.Status.OK){
@@ -79,13 +81,19 @@ const KakaoMap = ({keyword, setShopData}) => {
                     data: data,
                     dataCount: pagination.totalCount,
                 })
-                // changeData(data, pagination.totalCount);
-                console.log(data)
-                console.log(pagination.totalCount)
 
-                // console.log(shopData.data)
-                // console.log(shopData.dataCount)
-            
+                // if(currentPage < shopPrevNextPage.pagelength === true){
+                //     pagination.gotoPage(currentPage+1);
+                //     setCurrentPage(currentPage);
+                //     setShopPrevNextPage({next: false, prev: false})
+                // }    
+
+                if(shopHasPage === true){
+                    pagination.gotoPage(currentPage)
+                    setCurrentPage(currentPage)
+                }
+                console.log(shopHasPage)
+                console.log(currentPage)
             }else{
                 alert("주변에 상점이 없습니다.")
             }
@@ -103,19 +111,7 @@ const KakaoMap = ({keyword, setShopData}) => {
             })
         }
 
-        // 좌표 값에 해당하는 행정동, 법정동 정보 얻기
-        // const geocoder = new kakao.maps.services.Geocoder();
-        // const callback = function(result, status){
-        //     if(status === kakao.maps.services.Status.OK){
-        //         console.log('지역 명칭 : ' + result[0].address_name);
-        //     }
-        //     setDong(result[0]);
-        // };
-
-        // geocoder.coord2RegionCode(myLocation.longitude, myLocation.latitude, callback);
-
-}, [myLocation.latitude, myLocation.longitude, keyword, setShopData]);
-
+}, [myLocation.latitude, myLocation.longitude, keyword, currentPage, setShopData, shopHasPage, setCurrentPage]);
     return(
         <div id="map"></div>
     )

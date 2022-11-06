@@ -30,5 +30,3 @@ const RecommendArea = ({recommends, setSelectedAlcohol}) => {
     </div>
     );
 }
-
-export default RecommendArea;

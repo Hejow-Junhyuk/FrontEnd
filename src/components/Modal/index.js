@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faXmark, faComment, faStar, faHouse, faLocationDot, faClock, faPhone } from '@fortawesome/free-solid-svg-icons';
 import './Modal.scss';
+import StarRating from './StarRating';
 
 const Modal = (props) => {
     const handleXbuttonClick = () => {
@@ -31,6 +32,7 @@ const Modal = (props) => {
                         ))}
                     </div>
                     <div className="modal-shop-bottom">
+                        <StarRating/>
                         <form className="modal-shop-CommentInsert">
                             <input className="modal-shop-inputNames"
                                 placeholder='이름'

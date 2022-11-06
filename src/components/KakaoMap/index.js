@@ -4,15 +4,15 @@ const { kakao } = window;
 
 const KakaoMap = ({keyword, setShopData, shopHasPage, currentPage, setCurrentPage, myLocation ,setMyLocation}) => {
     const [kakaoMap, setKakaoMap] = useState(null);
-    // const [shopMarkers, setShopMarkers] = useState([]);
+    const [markers, setMarkers] = useState([]);
     const container = useRef();
-
+    console.log(markers)
     useEffect(()=>{
         // 지도 생성
         const center = new kakao.maps.LatLng(37.55323, 126.97271);
         const option = {
             center,
-            level: 6,
+            level: 7,
         };
         const map = new kakao.maps.Map(container.current, option);
         setKakaoMap(map);
@@ -58,13 +58,21 @@ const KakaoMap = ({keyword, setShopData, shopHasPage, currentPage, setCurrentPag
             displayMyMarker(locPosition);
         }
     },[kakaoMap, setMyLocation])
-
+    
     useEffect(()=>{
         if(kakaoMap === null){
             return;
         }
-        
-        function displayMarker(place){
+
+        function removeMarker(){
+            for(var i = 0; i < markers.length-4; i++){
+                markers[i].setMap(null)
+            }
+            markers.splice(0, markers.length-4)
+        }
+        console.log(markers)
+
+        function addMarker(place){
             // 마커 클릭시 장소명을 표출할 인포윈도우
             const infowindow = new kakao.maps.InfoWindow({zIndex: 1});
 
@@ -72,9 +80,12 @@ const KakaoMap = ({keyword, setShopData, shopHasPage, currentPage, setCurrentPag
                 // map: kakaoMap,
                 position: new kakao.maps.LatLng(place.y, place.x)
             });
-            
+            // 마커가 지도 위에 표시
             marker.setMap(kakaoMap);
             
+            // 생성된 마커를 배열에 추가
+            markers.push(marker)
+
             kakao.maps.event.addListener(marker, 'mouseover', function(){
                 infowindow.setContent('<div style="padding:5px; font-size:12px;">' + place.place_name + '</div>')
                 infowindow.open(kakaoMap, marker);
@@ -91,7 +102,7 @@ const KakaoMap = ({keyword, setShopData, shopHasPage, currentPage, setCurrentPag
 
         // 키워드로 장소 검색
         ps.keywordSearch(keyword, placesSearchCB, {
-            radius : 2000, // 반경
+            radius : 3000, // 반경
             location: new kakao.maps.LatLng(myLocation.latitude, myLocation.longitude),
             size: 4, // 한페이지에 몇개를 보여줄지
         });
@@ -101,15 +112,16 @@ const KakaoMap = ({keyword, setShopData, shopHasPage, currentPage, setCurrentPag
                 // 검색된 장소 위치를 기준으로 지도 범위를 재설정
                 const bounds = new kakao.maps.LatLngBounds();
                 for(var i=0; i < data.length; i++){
-                    // kmarkers.push(data[i])
                     bounds.extend(new kakao.maps.LatLng(data[i].y, data[i].x));
-                    displayMarker(data[i]);
+                    addMarker(data[i]);
                 }
                 
-
                 const mylocation = new kakao.maps.LatLng(myLocation.latitude, myLocation.longitude);
                 kakaoMap.setCenter(mylocation)     
-                // kakaoMap.setBounds(bounds)
+                kakaoMap.setBounds(bounds)
+
+                removeMarker();
+
                 setShopData({
                     data: data,
                     dataCount: pagination.totalCount,
@@ -136,7 +148,7 @@ const KakaoMap = ({keyword, setShopData, shopHasPage, currentPage, setCurrentPag
         //     alert('zoom changed!');
         // });
 
-    },[currentPage, keyword, myLocation.latitude, myLocation.longitude, setCurrentPage, setShopData, shopHasPage, kakaoMap, setMyLocation])
+    },[currentPage, keyword, myLocation.latitude, myLocation.longitude, setCurrentPage, setShopData, shopHasPage, kakaoMap, setMyLocation, markers])
     
     return(
         <div id="container" ref={container}></div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from "react";
+import React, { useState } from "react";
 // import { Shop } from "../../components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleDown } from "@fortawesome/free-solid-svg-icons";
@@ -6,37 +6,17 @@ import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import "./FindShop.scss";
 import KakaoMap from "../../components/KakaoMap";
 import Modal from "../../components/Modal";
-
-const ShopPagination = ({shopData, shopHasPage, setShopHasPage, currentPage, setCurrentPage, shopPrevNextPage, setShopPrevNextPage}) => {
-    const [shopPageCount, setShopPageCount] = useState(0); // 검색결과에 따라 page 생성
-    const [shopDataArr, setShopDataArr] = useState([]); // 페이지 번호를 위한 배열
-    const dataArr = Array.from({length: shopData.dataCount}, (_, i) => i + 1); // 검색결과 수에 따른 배열 만들기
-    
-    useEffect(()=>{
-        setShopPageCount(Math.ceil((dataArr.length / 4)));
-        setShopDataArr(Array.from({length: shopPageCount}, (_, i) => i + 1))
-    },[setShopPageCount, dataArr.length, shopPageCount, setShopDataArr])
-    
-    // console.log(shopDataArr)
-    // console.log(shopData.data)
-    
-    return(
-            <ul className="findshop-pagination">
-                <li onClick={() => {setShopPrevNextPage({next: false, prev : true, pageLength: shopDataArr.length})}}>{"<"}</li>
-                {shopDataArr.map((shops, index) => (
-                    <li key={index} onClick={()=> 
-                        {setCurrentPage(index + 1)
-                        setShopHasPage(true)}}>{shops}</li>
-                ))}
-                <li onClick={() => {setShopPrevNextPage({next: true, prev: false, pageLength: shopDataArr.length})}}>{">"}</li> 
-            </ul>
-            )
-}
+import ShopPagination from "../../components/ShopPagination";
 
 const FindShop = () => {
-    const [filterOption, setFilterOption] = useState("rank");
+    const [filterOption, /* setFilterOption*/] = useState("rank");
     const alchohols = ["와인", "위스키", "칵테일"];
-    const cities = ["서울", "부산", "인천", "수원", "대전", "대구", "광주"];
+    const cities = ["서울", "부산", "인천", "수원", "대전", "대구", "광주", "제주"];
+    const citiesCoordinateArr = [
+        {latitude: 37.55323, longitude: 126.97271}, {latitude: 35.11557, longitude: 129.04292}, {latitude: 37.45539, longitude: 126.70508},
+        {latitude: 37.26547, longitude: 126.99946}, {latitude: 36.33161, longitude:127.43470}, {latitude: 35.87594, longitude: 128.59690},
+        {latitude: 35.16567, longitude: 126.91042}, {latitude: 33.49939, longitude: 126.53074}];
+    
     const [modal, setModal] = useState(false);
     const [keyword, setKeyword] = useState("와인");
     const [currentPage, setCurrentPage] = useState(1); // 현재 페이지
@@ -45,20 +25,11 @@ const FindShop = () => {
         dataCount: 0
     });
     const [shopHasPage, setShopHasPage] = useState(false);
-    const [shopPrevNextPage, setShopPrevNextPage] = useState({
-        next: false,
-        prev: false,
-        pageLength: 0,
+    const [myLocation, setMyLocation] = useState({
+        latitude: null, 
+        longitude: null,
     });
 
-    const tmp = {
-        img: "이미지",
-        name: "가게이름",
-        description: "가게 특징/한줄평",
-        city: "지역",
-        reviews: 5.0,
-        tags: ["와인", "칵테일", "위스키"]
-    }
 
     return(
         <div className="findshop-area">            
@@ -81,10 +52,11 @@ const FindShop = () => {
                     setCurrentPage={setCurrentPage}
                     shopData={shopData}
                     setShopData={setShopData}
-                    shopPrevNextPage={shopPrevNextPage}
-                    setShopPrevNextPage={setShopPrevNextPage}
+                    myLocation={myLocation}
+                    setMyLocation={setMyLocation}
                     />
                 </div>
+
                 <div className="findshop-filter-row">
                     <p className="findshop-filter-title"><FontAwesomeIcon icon={faAngleDown}/>주종</p>
                     <div className="findshop-filter-tags">
@@ -96,8 +68,10 @@ const FindShop = () => {
                 <div className="findshop-filter-row">
                     <p className="findshop-filter-title"><FontAwesomeIcon icon={faAngleDown}/>지역</p>
                     <div className="findshop-filter-tags">
-                        {cities.map(c => 
-                            <ul key={c.toString()} className="findshop-filter-tag pointer">{c}</ul>
+                        {cities.map((c,index) => 
+                            <ul key={c.toString()} className="findshop-filter-tag pointer" onClick={()=>{
+                                setMyLocation(citiesCoordinateArr[index])
+                            setCurrentPage(1)}}>{c}</ul>
                         )}
                     </div>
                 </div>
@@ -151,9 +125,7 @@ const FindShop = () => {
                     shopHasPage={shopHasPage}
                     setShopHasPage={setShopHasPage}
                     currentPage={currentPage}
-                    setCurrentPage={setCurrentPage}
-                    shopPrevNextPage={shopPrevNextPage}
-                    setShopPrevNextPage={setShopPrevNextPage}/>
+                    setCurrentPage={setCurrentPage}/>
             </div>
         </div>
     )

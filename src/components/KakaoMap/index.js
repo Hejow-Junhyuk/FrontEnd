@@ -4,7 +4,7 @@ const { kakao } = window;
 
 const KakaoMap = ({keyword, setShopData, shopHasPage, currentPage, setCurrentPage, myLocation ,setMyLocation}) => {
     const [kakaoMap, setKakaoMap] = useState(null);
-    const [markers, setMarkers] = useState([]);
+    const [markers, ] = useState([]);
     const container = useRef();
     console.log(markers)
     useEffect(()=>{
@@ -118,7 +118,7 @@ const KakaoMap = ({keyword, setShopData, shopHasPage, currentPage, setCurrentPag
                 
                 const mylocation = new kakao.maps.LatLng(myLocation.latitude, myLocation.longitude);
                 kakaoMap.setCenter(mylocation)     
-                kakaoMap.setBounds(bounds)
+                // kakaoMap.setBounds(bounds)
 
                 removeMarker();
 

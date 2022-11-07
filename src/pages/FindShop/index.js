@@ -3,8 +3,6 @@ import { Shop, KakaoMap, Modal } from "../../components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleDown, faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import "./FindShop.scss";
-import KakaoMap from "../../components/KakaoMap";
-import Modal from "../../components/Modal";
 import ShopPagination from "../../components/ShopPagination";
 import { db } from '../../firebase';
 import { getDoc, updateDoc, doc, setDoc, serverTimestamp, arrayUnion } from "firebase/firestore";
@@ -13,11 +11,19 @@ import CryptoJS from "crypto-js";
 const FindShop = () => {
     const [filterOption, setFilterOption] = useState("rank");
     const [selectedShop, setSelectedShop] = useState(null);
-    const [currentItems, setCurentItems] = useState([]);
-    const [shops, setShops] = useState([]);
     const [keyword, setKeyword] = useState("와인");
     const [keyRef, setKeyRef] = useState(null);
     const [userId, setUserId] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1); // 현재 페이지
+    const [shopData, setShopData] = useState({
+        data: [],
+        dataCount: 0
+    });
+    const [shopHasPage, setShopHasPage] = useState(false);
+    const [myLocation, setMyLocation] = useState({
+        latitude: null, 
+        longitude: null,
+    });
 
     const getUserId = () => {
         const userToken = window.sessionStorage.getItem("TIPSY");
@@ -33,39 +39,14 @@ const FindShop = () => {
 
     const filters = {
         alchohols: ["와인", "위스키", "칵테일"],
-        cities: ["서울", "부산", "인천", "수원", "대전", "대구", "광주"]
+        cities: ["서울", "부산", "인천", "수원", "대전", "대구", "광주", "제주"]
     }
 
-    const tmpData = {
-        img: "이미지",
-        name: "가게이름",
-        description: "가게 특징/한줄평",
-        city: "지역",
-        reviews: 5.0,
-        tags: ["와인", "칵테일", "위스키"]
-    }
-    const [filterOption, /* setFilterOption*/] = useState("rank");
-    const alchohols = ["와인", "위스키", "칵테일"];
-    const cities = ["서울", "부산", "인천", "수원", "대전", "대구", "광주", "제주"];
     const citiesCoordinateArr = [
         {latitude: 37.55323, longitude: 126.97271}, {latitude: 35.11557, longitude: 129.04292}, {latitude: 37.45539, longitude: 126.70508},
         {latitude: 37.26547, longitude: 126.99946}, {latitude: 36.33161, longitude:127.43470}, {latitude: 35.87594, longitude: 128.59690},
         {latitude: 35.16567, longitude: 126.91042}, {latitude: 33.49939, longitude: 126.53074}];
     
-    const [modal, setModal] = useState(false);
-    const [keyword, setKeyword] = useState("와인");
-    const [currentPage, setCurrentPage] = useState(1); // 현재 페이지
-    const [shopData, setShopData] = useState({
-        data: [],
-        dataCount: 0
-    });
-    const [shopHasPage, setShopHasPage] = useState(false);
-    const [myLocation, setMyLocation] = useState({
-        latitude: null, 
-        longitude: null,
-    });
-
-
     useEffect(() => {
         console.log("FindShop Effected");
         getReviewKeyRef();
@@ -143,7 +124,7 @@ const FindShop = () => {
                 </div>
                 <div className="findshop-shop-area">
                     {shopData && shopData.data.map((item) => (        
-                    <div className='shop-container pointer' key={item.id} onClick={()=>setModal(true)}>
+                    <div className='shop-container pointer' key={item.id} onClick={()=>setSelectedShop(true)}>
                         <div className='shop-img-area'>
                             {item.img}
                         </div>

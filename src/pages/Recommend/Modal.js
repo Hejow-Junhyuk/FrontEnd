@@ -2,10 +2,10 @@ import React, {useEffect, useState, useCallback} from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { db } from '../../firebase';
-import { getDocs, doc, getDoc, query, where, collection, setDoc, serverTimestamp, updateDoc, increment, deleteDoc } from "firebase/firestore";
+import { getDocs, doc, getDoc, query, where, collection, setDoc, serverTimestamp, updateDoc, increment, deleteDoc} from "firebase/firestore";
 import WineRating from "./WineRating";
 
-const Modal = ({ userId, alcohol, keyRef, selectedAlcohol, setSelectedAlcohol }) => {
+const Modal = ({ userId, alcohol, keyRef, selectedAlcohol, setSelectedAlcohol}) => {
     const [comments, setComments] = useState([]);
     const [updateMode, setUpdateMode] = useState({
         status: false,

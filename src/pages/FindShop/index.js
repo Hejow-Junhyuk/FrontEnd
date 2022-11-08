@@ -3,7 +3,6 @@ import { Shop, KakaoMap, Modal, ShopPagination } from "../../components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleDown, faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import "./FindShop.scss";
-import ShopPagination from "../../components/ShopPagination";
 import { db } from '../../firebase';
 import { doc } from "firebase/firestore";
 import CryptoJS from "crypto-js";

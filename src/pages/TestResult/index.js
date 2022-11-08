@@ -60,9 +60,9 @@ const TestResult = () => {
                 </div>
                 <div className="testresult-ment">{Alcohols[state].ment}</div>
                 <div className="testresult-comment-area">
-                    {Alcohols[state].comments.map(comment => (
-                        <p className="testresult-comment" key={comment.toString()}>{comment}</p>
-                    ))}
+                        {Alcohols[state].comments.map(comment => (
+                            <p className="testresult-comment" key={comment.toString()}>{comment}</p>
+                        ))}
                 </div>
                 <div className="testresult-btn-area">
                     <button className="testresult-btn pointer" onClick={() => navigate('/testguide')}>다시하기</button>

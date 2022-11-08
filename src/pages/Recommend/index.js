@@ -138,6 +138,7 @@ const Recommend = () => {
                     />
             </div>
             <div className='recommend-right'></div>
+
         </div>
     );
 }
